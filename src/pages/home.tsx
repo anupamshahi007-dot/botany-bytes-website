@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { PlayCircle, Leaf, BookOpen, Microscope, ArrowRight, Youtube, Sprout, Video, Users, Flower2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 const YOUTUBE_URL = "https://www.youtube.com/@botanybytes-07";
 const SUBSCRIBE_URL = "https://www.youtube.com/@botanybytes-07?sub_confirmation=1";
@@ -47,6 +48,9 @@ export default function Home() {
             <span className="font-serif font-semibold text-2xl tracking-tight">Botany Bytes</span>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="ghost" asChild className="hidden sm:flex hover:text-primary hover:bg-primary/5">
+              <Link href="/videos">All Videos</Link>
+            </Button>
             <Button variant="ghost" asChild className="hidden sm:flex hover:text-primary hover:bg-primary/5">
               <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram</a>
             </Button>
