@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Botany Bytes"
+version = "1.0.0"
+id = "artifacts/botany-bytes"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23936
+
+[services.development]
+run = "pnpm --filter @workspace/botany-bytes run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/botany-bytes", "run", "build" ]
+publicDir = "artifacts/botany-bytes/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23936"
+BASE_PATH = "/"
