@@ -1,7 +1,9 @@
-import { motion } from "framer-motion";
-import { PlayCircle, Leaf, BookOpen, Microscope, ArrowRight, Youtube, Sprout, Video, Users, Flower2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PlayCircle, Leaf, BookOpen, Microscope, ArrowRight, Youtube, Sprout, Video, Users, Flower2, Mail, CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
+import { useState } from "react";
 
 const YOUTUBE_URL = "https://www.youtube.com/@botanybytes-07";
 const SUBSCRIBE_URL = "https://www.youtube.com/@botanybytes-07?sub_confirmation=1";
@@ -34,6 +36,179 @@ const VIDEOS = [
     image: "/tulsi.png"
   }
 ];
+
+function NewsletterSection() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!name.trim()) { setError("Please enter your name."); return; }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address."); return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1000);
+  };
+
+  return (
+    <section className="py-32 px-6 bg-background relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="container mx-auto max-w-2xl relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6 border border-primary/20">
+            <Mail className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-4xl md:text-5xl font-serif text-primary mb-4 tracking-tight">Stay in the Loop</h2>
+          <p className="text-lg text-muted-foreground font-light max-w-lg mx-auto leading-relaxed">
+            Get weekly plant care tips, NEET botany highlights, and new video alerts delivered straight to your inbox.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="bg-card border border-border/60 rounded-[2.5rem] p-8 md:p-12 shadow-xl"
+        >
+          <AnimatePresence mode="wait">
+            {submitted ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-6"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                  className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6 border-2 border-primary/30"
+                >
+                  <CheckCircle className="w-10 h-10 text-primary" />
+                </motion.div>
+                <h3 className="text-2xl font-serif text-primary mb-3">You're in! 🌿</h3>
+                <p className="text-muted-foreground font-light mb-8 leading-relaxed">
+                  Welcome to the Botany Bytes community, <strong className="text-foreground">{name}</strong>!<br />
+                  You'll be the first to know about new videos and plant tips.
+                </p>
+                <Button asChild className="rounded-full h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20">
+                  <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">
+                    Also Join Our Telegram →
+                  </a>
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleSubmit}
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-5"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground/80 pl-1">Your Name</label>
+                    <Input
+                      value={name}
+                      onChange={e => { setName(e.target.value); setError(""); }}
+                      placeholder="e.g. Priya Sharma"
+                      className="h-13 rounded-2xl border-border/60 bg-background focus:border-primary/50 text-base px-5 py-3"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground/80 pl-1">Email Address</label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={e => { setEmail(e.target.value); setError(""); }}
+                      placeholder="you@example.com"
+                      className="h-13 rounded-2xl border-border/60 bg-background focus:border-primary/50 text-base px-5 py-3"
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-destructive text-sm pl-1"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all duration-200 mt-2"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Subscribing…
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Send className="w-4 h-4" />
+                      Subscribe for Free
+                    </span>
+                  )}
+                </Button>
+
+                <p className="text-center text-xs text-muted-foreground/60 pt-1">
+                  No spam, ever. Unsubscribe anytime. 🌱
+                </p>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="mt-10 flex items-center justify-center gap-8 text-sm text-muted-foreground"
+        >
+          {[
+            { label: "Weekly tips", icon: "🌿" },
+            { label: "NEET highlights", icon: "📚" },
+            { label: "New video alerts", icon: "🎬" },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
@@ -364,6 +539,9 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Newsletter Signup */}
+      <NewsletterSection />
 
       {/* Footer */}
       <footer className="py-16 px-6 bg-card border-t border-border">
