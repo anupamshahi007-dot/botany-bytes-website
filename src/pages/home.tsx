@@ -44,7 +44,7 @@ function NewsletterSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!name.trim()) { setError("Please enter your name."); return; }
@@ -52,10 +52,22 @@ function NewsletterSection() {
       setError("Please enter a valid email address."); return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("https://formspree.io/f/mqevnnnw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ name, email }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
       setLoading(false);
-      setSubmitted(true);
-    }, 1000);
+    }
   };
 
   return (
