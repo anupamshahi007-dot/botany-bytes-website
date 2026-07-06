@@ -3,7 +3,7 @@ import { PlayCircle, Leaf, BookOpen, Microscope, ArrowRight, Youtube, Sprout, Vi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const YOUTUBE_URL = "https://www.youtube.com/@botanybytes-07";
 const SUBSCRIBE_URL = "https://www.youtube.com/@botanybytes-07?sub_confirmation=1";
@@ -37,12 +37,23 @@ const VIDEOS = [
   }
 ];
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 function NewsletterSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [count, setCount] = useState<number | null>(null);
+
+  // Fetch live subscriber count on mount
+  useEffect(() => {
+    fetch(`${BASE}/api/newsletter/count`)
+      .then(r => r.json())
+      .then(d => setCount(d.count ?? null))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,16 +64,27 @@ function NewsletterSection() {
     }
     setLoading(true);
     try {
-      const res = await fetch("https://formspree.io/f/mqevnnnw", {
+      // Send to Formspree for email notification
+      const formspreeRes = await fetch("https://formspree.io/f/mqevnnnw", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ name, email }),
       });
-      if (res.ok) {
-        setSubmitted(true);
-      } else {
+      if (!formspreeRes.ok) {
         setError("Something went wrong. Please try again.");
+        return;
       }
+      // Save to our DB and get updated count
+      const apiRes = await fetch(`${BASE}/api/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email }),
+      });
+      if (apiRes.ok) {
+        const data = await apiRes.json();
+        setCount(data.count);
+      }
+      setSubmitted(true);
     } catch {
       setError("Network error. Please check your connection and try again.");
     } finally {
@@ -92,6 +114,30 @@ function NewsletterSection() {
           <p className="text-lg text-muted-foreground font-light max-w-lg mx-auto leading-relaxed">
             Get weekly plant care tips, NEET botany highlights, and new video alerts delivered straight to your inbox.
           </p>
+          {count !== null && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={count}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {count} {count === 1 ? "subscriber" : "subscribers"} and growing 🌱
+                </motion.span>
+              </AnimatePresence>
+            </motion.div>
+          )}
         </motion.div>
 
         <motion.div
